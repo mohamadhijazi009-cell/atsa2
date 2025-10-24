@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import { collection, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { Plus, Edit2, Trash2, LogOut, Home } from 'lucide-react';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../config/firebase';
+import { Plus, Edit2, Trash2, LogOut, Home, Upload, X } from 'lucide-react';
 
 export function AdminDashboard() {
   const { isAdmin, logout } = useAuth();
@@ -18,11 +19,62 @@ export function AdminDashboard() {
     imageUrl: '',
     slug: ''
   });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isAdmin) {
     navigate('/admin/login');
     return null;
   }
+
+  const handleFileUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      setFormData({ ...formData, imageUrl: downloadURL });
+      setUploadedFile(file);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileUpload(e.target.files[0]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +93,7 @@ export function AdminDashboard() {
       setShowModal(false);
       setEditingProduct(null);
       setFormData({ title: '', description: '', imageUrl: '', slug: '' });
+      setUploadedFile(null);
     } catch (error) {
       console.error('Error saving product:', error);
     }
@@ -54,6 +107,7 @@ export function AdminDashboard() {
       imageUrl: product.imageUrl,
       slug: product.slug
     });
+    setUploadedFile(null);
     setShowModal(true);
   };
 
@@ -108,6 +162,7 @@ export function AdminDashboard() {
             onClick={() => {
               setEditingProduct(null);
               setFormData({ title: '', description: '', imageUrl: '', slug: '' });
+              setUploadedFile(null);
               setShowModal(true);
             }}
             className="flex items-center gap-2 bg-[#3d4f5c] text-white px-6 py-3 rounded-lg hover:bg-[#2d3f4c] transition font-semibold"
@@ -190,14 +245,86 @@ export function AdminDashboard() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
-                <input
-                  type="text"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3d4f5c] focus:border-transparent"
-                  required
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+
+                <div
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition ${
+                    dragActive ? 'border-[#3d4f5c] bg-slate-50' : 'border-gray-300'
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileInput}
+                    className="hidden"
+                  />
+
+                  {formData.imageUrl ? (
+                    <div className="space-y-3">
+                      <img
+                        src={formData.imageUrl}
+                        alt="Preview"
+                        className="mx-auto h-40 w-auto rounded-lg object-cover"
+                      />
+                      <div className="flex justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-4 py-2 bg-[#3d4f5c] text-white rounded-lg hover:bg-[#2d3f4c] transition text-sm"
+                        >
+                          Change Image
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, imageUrl: '' });
+                            setUploadedFile(null);
+                          }}
+                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="text-[#3d4f5c] hover:underline font-medium"
+                        >
+                          Click to upload
+                        </button>
+                        <span className="text-gray-600"> or drag and drop</span>
+                      </div>
+                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                  )}
+
+                  {uploading && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-lg">
+                      <div className="w-8 h-8 border-4 border-[#3d4f5c] border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-2">
+                  <label className="block text-xs text-gray-500 mb-1">Or paste image URL</label>
+                  <input
+                    type="text"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3d4f5c] focus:border-transparent text-sm"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
               </div>
               <div className="flex gap-3 pt-4">
                 <button
@@ -212,6 +339,7 @@ export function AdminDashboard() {
                     setShowModal(false);
                     setEditingProduct(null);
                     setFormData({ title: '', description: '', imageUrl: '', slug: '' });
+                    setUploadedFile(null);
                   }}
                   className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
                 >

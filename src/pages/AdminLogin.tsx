@@ -24,7 +24,7 @@ export function AdminLogin() {
         setError('Account created successfully! Please log in.');
       } else {
         await login(email, password);
-        navigate('/admin');
+        navigate('/');
       }
     } catch (err: any) {
       if (isSignUp) {
@@ -47,10 +47,10 @@ export function AdminLogin() {
             </div>
           </div>
           <h2 className="text-3xl font-bold text-[#3d4f5c] animate-fadeIn delay-100">
-            {isSignUp ? 'Create Account' : 'Admin Login'}
+            {isSignUp ? 'Create Account' : 'Login'}
           </h2>
           <p className="text-gray-600 mt-2 animate-fadeIn delay-200">
-            {isSignUp ? 'Sign up to get started' : 'Sign in to manage products'}
+            {isSignUp ? 'Sign up to get started' : 'Sign in to your account'}
           </p>
         </div>
 
