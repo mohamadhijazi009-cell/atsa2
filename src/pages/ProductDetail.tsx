@@ -44,7 +44,7 @@ export function ProductDetail() {
 
       <main className="container mx-auto px-6 pt-32 pb-20">
         <div className="grid md:grid-cols-2 gap-12 items-start">
-          <div className="relative">
+          <div className="relative animate-slideInLeft" style={{ opacity: 0 }}>
             <div className="sticky top-32">
               <img
                 src={product.imageUrl}
@@ -54,7 +54,7 @@ export function ProductDetail() {
             </div>
           </div>
 
-          <div>
+          <div className="animate-slideInRight" style={{ opacity: 0 }}>
             <h1 className="text-4xl md:text-5xl font-bold text-[#3d4f5c] mb-6">
               {product.title}
             </h1>
@@ -64,7 +64,7 @@ export function ProductDetail() {
               </p>
             </div>
 
-            <div className="mt-12 p-8 bg-gradient-to-br from-slate-50 to-gray-100 rounded-2xl">
+            <div className="mt-12 p-8 bg-gradient-to-br from-slate-50 to-gray-100 rounded-2xl animate-fadeIn delay-200" style={{ opacity: 0 }}>
               <h2 className="text-2xl font-bold text-[#3d4f5c] mb-6">
                 Interested in this product?
               </h2>
@@ -87,7 +87,7 @@ export function ProductDetail() {
               </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 animate-fadeIn delay-300" style={{ opacity: 0 }}>
               <h3 className="text-xl font-bold text-[#3d4f5c] mb-4">Our Expertise</h3>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-center gap-2">
@@ -112,18 +112,19 @@ export function ProductDetail() {
         </div>
 
         <section className="mt-20">
-          <h2 className="text-3xl font-bold text-[#3d4f5c] mb-8 text-center">
+          <h2 className="text-3xl font-bold text-[#3d4f5c] mb-8 text-center animate-fadeIn delay-400" style={{ opacity: 0 }}>
             Other Products
           </h2>
           <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products
               .filter(p => p.id !== product.id)
               .slice(0, 4)
-              .map(relatedProduct => (
+              .map((relatedProduct, index) => (
                 <Link
                   key={relatedProduct.id}
                   to={`/product/${relatedProduct.slug}`}
-                  className="group"
+                  className="group animate-scaleIn"
+                  style={{ animationDelay: `${(index + 5) * 0.1}s`, opacity: 0 }}
                 >
                   <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition">
                     <img

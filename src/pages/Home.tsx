@@ -25,13 +25,21 @@ export function Home() {
               <a href="#services" className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">Services</a>
               <a href="#materials" className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">Materials</a>
               <a href="#contact" className="px-4 py-2 rounded-lg bg-white text-[#3d4f5c] hover:bg-gray-100 transition font-semibold shadow-md">Contact</a>
-              {isAdmin && (
+              {isAdmin ? (
                 <button
                   onClick={() => navigate('/admin')}
                   className="px-4 py-2 rounded-lg bg-white text-[#3d4f5c] hover:bg-gray-100 transition font-semibold shadow-md flex items-center gap-2"
                 >
                   <Lock className="w-4 h-4" />
                   Admin
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate('/admin/login')}
+                  className="px-4 py-2 rounded-lg bg-white text-[#3d4f5c] hover:bg-gray-100 transition font-semibold shadow-md flex items-center gap-2"
+                >
+                  <Lock className="w-4 h-4" />
+                  Login
                 </button>
               )}
             </div>
@@ -42,13 +50,13 @@ export function Home() {
       <section className="container mx-auto px-6 py-32 mt-20 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-slate-400/30 via-blue-gray-400/20 to-transparent rounded-3xl"></div>
         <div className="max-w-3xl relative z-10">
-          <h1 className="text-5xl font-bold text-[#3d4f5c] mb-6">
+          <h1 className="text-5xl font-bold text-[#3d4f5c] mb-6 animate-fadeIn">
             Precision Manufacturing in Stainless Steel
           </h1>
-          <p className="text-xl text-gray-600 mb-4">
+          <p className="text-xl text-gray-600 mb-4 animate-fadeIn delay-100">
             Since 1992, ATSA has been leading the industry with over 30 years of expertise in stainless steel fabrication and precision metalwork.
           </p>
-          <p className="text-lg text-gray-500 mb-8">
+          <p className="text-lg text-gray-500 mb-8 animate-fadeIn delay-200">
             Specializing in aluminum, inox, stainless steel, welding, cutting, bending, and mechanical works.
           </p>
         </div>
@@ -71,8 +79,13 @@ export function Home() {
             </div>
           ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayedProducts.map(product => (
-              <Link key={product.id} to={`/product/${product.slug}`} className="relative group">
+            {displayedProducts.map((product, index) => (
+              <Link
+                key={product.id}
+                to={`/product/${product.slug}`}
+                className="relative group animate-scaleIn"
+                style={{ animationDelay: `${index * 0.1}s`, opacity: 0 }}
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-700/80 to-slate-900/80 backdrop-blur-xl rounded-lg transform transition-transform group-hover:scale-105"></div>
                 <div className="relative bg-white/90 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition">
                   <img src={product.imageUrl} alt={product.title} className="w-full h-64 object-cover" />
@@ -105,7 +118,7 @@ export function Home() {
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold text-[#3d4f5c] mb-12 text-center">Our Services</h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="relative p-8 rounded-lg shadow-sm overflow-hidden group">
+            <div className="relative p-8 rounded-lg shadow-sm overflow-hidden group animate-slideInLeft" style={{ opacity: 0 }}>
               <div className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 transition" style={{backgroundImage: 'url(https://images.pexels.com/photos/1474993/pexels-photo-1474993.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750)'}}></div>
               <div className="absolute inset-0 bg-gradient-to-b from-white/90 to-white/95"></div>
               <div className="relative z-10">
@@ -116,7 +129,7 @@ export function Home() {
                 </p>
               </div>
             </div>
-            <div className="relative p-8 rounded-lg shadow-sm overflow-hidden group">
+            <div className="relative p-8 rounded-lg shadow-sm overflow-hidden group animate-fadeIn delay-100" style={{ opacity: 0 }}>
               <div className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 transition" style={{backgroundImage: 'url(https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750)'}}></div>
               <div className="absolute inset-0 bg-gradient-to-b from-white/90 to-white/95"></div>
               <div className="relative z-10">
@@ -127,7 +140,7 @@ export function Home() {
                 </p>
               </div>
             </div>
-            <div className="relative p-8 rounded-lg shadow-sm overflow-hidden group">
+            <div className="relative p-8 rounded-lg shadow-sm overflow-hidden group animate-slideInRight delay-200" style={{ opacity: 0 }}>
               <div className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 transition" style={{backgroundImage: 'url(https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750)'}}></div>
               <div className="absolute inset-0 bg-gradient-to-b from-white/90 to-white/95"></div>
               <div className="relative z-10">
